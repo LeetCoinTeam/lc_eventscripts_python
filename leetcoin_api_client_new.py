@@ -79,6 +79,64 @@ class SharedData():
     def get_players_connected(self):
         return self.players_connected
 
+class Award():
+    """ a leetcoin award """
+    def __init__(self, playerKey, playerUserId, playerName, amount, title):
+        self.playerKey = playerKey
+        self.playerUserId = playerUserId
+        self.playerName = playerName
+        self.amount = amount
+        self.title = title
+    def to_dict(self):
+        return ({
+            u'playerKey': self.playerKey,
+            u'playerUserId': self.playerUserId,
+            u'playerName': self.playerName,
+            u'amount': self.amount,
+            u'title': self.title
+        })
+
+class Player():
+    """ a leetcoin player """
+    def __init__(self, key, platformID, btcBalance, btcHold, kills, deaths, player_active, name, userid=0, rank=1600):
+        self.key = key
+        self.platformID = platformID
+        self.btcBalance = btcBalance
+        self.btcHold = btcHold
+        self.kills = kills
+        self.deaths = deaths
+        self.player_active = player_active
+        self.name = name
+        self.disconnected = False
+        self.userid = userid
+        self.rank = rank
+        self.kick = False
+        self.weapon = ""
+        self.activate_timestamp = datetime.datetime.now()
+        self.deactivate_timestamp = datetime.datetime.now()
+    
+    def activate(self, userid, satoshi_balance):
+        self.player_active = True
+        self.userid = userid
+        self.btcBalance = satoshi_balance
+        self.btcHold = satoshi_balance
+        
+    def deactivate(self):
+        self.player_active = False
+        
+    def to_dict(self):
+        return ({
+                u'key': self.key,
+                u'platformID': self.platformID,
+                u'btcBalance': self.btcBalance,
+                u'btcHold': self.btcHold,
+                u'kills': self.kills,
+                u'deaths': self.deaths,
+                u'player_active': self.player_active,
+                u'name': self.name,
+                u'rank': self.rank,
+                u'weapon': self.weapon
+                })
 
 class LeetCoinAPIClient():
 
@@ -89,6 +147,16 @@ class LeetCoinAPIClient():
         self.encryption = encryption
         self.debug = debug
         self.players_connected = False # track if players are still connected
+
+
+        self.shareddata = SharedData()
+        max_threads = 5
+        # start up the threads.
+        self.workers = []
+        for i in range(0, max_threads):
+            self.workers.append(Workers(i, self.shareddata, debug)
+        for i in self.workers:
+            i.start()
         
         self.totalkills = 0 # track total kills for server
         self.matchkills = 0 # kills for this batched round
@@ -115,7 +183,6 @@ class LeetCoinAPIClient():
             self.allow_non_authorized_players = server_info['allow_non_authorized_players']
         
             self.authorizedPlayerObjectList = []
-            self.shareddata = SharedData()
             
             #self.awardQueue = []
             
@@ -603,7 +670,10 @@ class Worker(threading.Thread):
                     player_obj.btcBalance = player_obj.btcBalance + int(award.amount)
                     if self.debug:
                         print("[1337] [%s] [request_award] new balance: %s" % (self.threadID, player.obj.btcBalance))
-                    tell_all_players ####!!!!!!!!! TODO!!!
+                    #tell_all_players('%s earned: %s Satoshi for: %s' %(player_obj.name, award.amount, award.title))
+                    tell_all_players('%s earned: %s Satoshi for: %s'
+                                      % (player_obj.name, award.amount, award.title))
+                                      
                     
 #        apiClient.threadRequestAward(award_info, award )
 
