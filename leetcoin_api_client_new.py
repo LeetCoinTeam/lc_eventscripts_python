@@ -87,6 +87,7 @@ class Award():
         self.playerName = playerName
         self.amount = amount
         self.title = title
+
     def to_dict(self):
         return ({
             u'playerKey': self.playerKey,
