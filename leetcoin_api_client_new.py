@@ -57,7 +57,7 @@ the consumers will simply take whatever is available and act upon what it is tol
 
 
 class SharedData():
-    def __init__(self, url, api_key, shared_secret, encryption, debug, 
+    def __init__(self):
         self.authorizedPlayerObjectList = []
         self.players_connected = False
 
@@ -70,7 +70,7 @@ class SharedData():
     def len_authorized_player_list(self):
         return len(self.authorizedPlayerObjectList)
 
-    def delete_from_authorized_player_list(self, index)
+    def delete_from_authorized_player_list(self, index):
         self.authorizedPlayerObjectList.pop(index)
 
     def set_players_connected(self, value):
@@ -154,7 +154,7 @@ class LeetCoinAPIClient():
         # start up the threads.
         self.workers = []
         for i in range(0, max_threads):
-            self.workers.append(Workers(i, self.shareddata, debug)
+            self.workers.append(Worker(i, self.shareddata, debug))
         for i in self.workers:
             i.start()
         
@@ -484,7 +484,7 @@ class Worker(threading.Thread):
         player_found = False
         sharedDataSemaphore.acquire()
         authorizedPlayers = self.shareddata.get_authorized_player_list()
-        for index, player_obj in enumerate(authorizedPlayers) #######!!!!!!!!!! <- this is shared data!
+        for index, player_obj in enumerate(authorizedPlayers): #######!!!!!!!!!! <- this is shared data!
             if player_obj.userid == userid:
                 player_found = True
                 player_index = index
@@ -655,7 +655,7 @@ class Worker(threading.Thread):
             print ("[1337] [%s] [request_award]" % self.threadID)
             print ("[1337] [%s] [request_award] award_info: %s" % (self.threadID, award_info))
             print ("[1337] [%s] [request_award] award: %s" % (self.threadID, award))
-        if award_info("authorization"]:
+        if award_info["authorization"]:
             if award_info['award_authorized'] is True:
                 if self.debug:
                     print("[1337] [%s] [request_award] AUTHORIZED!" % (self.threadID))
